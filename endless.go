@@ -128,6 +128,27 @@ func NewServer(addr string, handler http.Handler) (srv *endlessServer) {
 }
 
 /*
+HandleBeforeFunc registers the before handler function for the given signal.
+*/
+func (srv *endlessServer) HandleBeforeFunc(sig os.Signal, f func()) {
+	srv.addHook(PRE_SIGNAL, sig, f)
+}
+
+/*
+HandleAfterFunc registers the after handler function for the given signal.
+*/
+func (srv *endlessServer) HandleAfterFunc(sig os.Signal, f func()) {
+	srv.addHook(POST_SIGNAL, sig, f)
+}
+
+/*
+addHook appends the handler function to the given stage and signal list.
+*/
+func (srv *endlessServer) addHook(stage int, sig os.Signal, f func()) {
+	srv.SignalHooks[stage][sig] = append(srv.SignalHooks[stage][sig], f)
+}
+
+/*
 ListenAndServe listens on the TCP network address addr and then calls Serve
 with handler to handle requests on incoming connections. Handler is typically
 nil, in which case the DefaultServeMux is used.
